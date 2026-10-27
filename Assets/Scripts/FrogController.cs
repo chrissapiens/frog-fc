@@ -1,40 +1,29 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// Handles one frog's movement, double jump, and headbutt.
-// The tongue lives in its own script (Tongue.cs) on the same object.
+// handles one frog's movement, double jump, and headbutt.
+// the tongue lives in its own script (Tongue.cs) on the same object.
 public class FrogController : MonoBehaviour
 {
-    [Header("Keys")]
+    // keys
     public Key leftKey  = Key.A;
     public Key rightKey = Key.D;
     public Key jumpKey  = Key.W;
 
-    [Header("Movement")]
+   // movement
     public float moveSpeed       = 7f;
     public float firstJumpForce  = 13f;
-    public float secondJumpForce = 9f;    // weaker, so it reads as a hop
+    public float secondJumpForce = 9f;    // weaker second jump
 
-    [Tooltip("How fast the frog can change direction while airborne, in units " +
-             "per second squared. Lower feels more committed to the jump arc; " +
-             "higher feels floaty and arcade-y. Set to 0 for no air control.")]
-    public float airAcceleration = 25f;
+    public float airAcceleration = 20f;
 
-    [Header("Headbutt")]
-    public float headbuttForce = 15f;     // strong but imprecise
+    public float headbuttForce = 15f;     // strong but imprecise headbutt
 
-    [Tooltip("Minimum gap between headbutts. Without this, a frog pressed " +
-             "against a wall re-launches the ball into that wall every frame, " +
-             "and the physics solver lets them overlap.")]
-    public float headbuttCooldown = 0.25f;
+    public float headbuttCooldown = 0.25f; // headbutt cooldown to prevent ball from relaunching 
+                                          // into the wall when a player is pressed up on it
 
-    [Header("Knockback")]
-    [Tooltip("How long after being tongued this frog stops driving its own " +
-             "horizontal speed. Without this window, FixedUpdate overwrites the " +
-             "knockback velocity on the very next physics step and nothing moves.")]
-    public float knockbackTime = 0.3f;
+    public float knockbackTime = 0.3f; // time a player can't move horizontally after being tongue hit
 
-    [Header("Ground Check")]
     public Transform groundCheck;         // empty child at the frog's feet
     public float groundCheckRadius = 0.15f;
     public LayerMask groundLayer;
@@ -60,40 +49,36 @@ public class FrogController : MonoBehaviour
         Keyboard kb = Keyboard.current;
         if (kb == null) return;
 
-        // Read horizontal input
+        // read horizontal input
         moveInput = 0f;
         if (kb[leftKey].isPressed)  moveInput -= 1f;
         if (kb[rightKey].isPressed) moveInput += 1f;
 
         if (moveInput != 0f) Facing = (int)Mathf.Sign(moveInput);
 
-        // Ground check resets the double jump
+        // ground check resets the double jump
         if (IsGrounded() && rb.linearVelocity.y <= 0.01f) jumpsUsed = 0;
 
         if (kb[jumpKey].wasPressedThisFrame && jumpsUsed < 2)
         {
             float force = (jumpsUsed == 0) ? firstJumpForce : secondJumpForce;
 
-            // Clear downward speed first so a double jump always feels the same
+            // clear downward speed (double jump always feels the same)
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
             rb.AddForce(Vector2.up * force, ForceMode2D.Impulse);
             jumpsUsed++;
         }
     }
 
-    // Called by another frog's Tongue. Shoves this frog and briefly hands
-    // control of its horizontal speed over to the physics engine.
+    // shoving a frog with tognue, hands physics over to Unity
     public void ApplyKnockback(Vector2 impulse)
     {
         knockbackTimer = knockbackTime;
         rb.AddForce(impulse, ForceMode2D.Impulse);
     }
 
-    // True when something in the Ground Layer mask is under the frog's feet.
-    // The Frog layer is in that mask so you can land on the other player's head,
-    // which means this has to skip the frog's own collider - the ground check
-    // sits at the bottom edge and overlaps it, which would otherwise read as
-    // permanently grounded and give infinite jumps.
+// checks if the ground is under teh frog's feet  (frog layer counts too)
+// you can land another player's head, skips my own collider
     bool IsGrounded()
     {
         Collider2D[] hits = Physics2D.OverlapCircleAll(
@@ -111,17 +96,15 @@ public class FrogController : MonoBehaviour
 
     void FixedUpdate()
     {
-        // While being knocked back, let physics move the frog instead of
-        // forcing its velocity from input
+        // when being knocked back, physics moves the frog
         if (knockbackTimer > 0f)
         {
             knockbackTimer -= Time.fixedDeltaTime;
             return;
         }
 
-        // On the ground, drive horizontal speed straight from input.
-        // In the air, only steer toward the target speed, and only while a
-        // direction is actually held, so letting go preserves the jump arc.
+        // ground = instant control 
+        // air = slow steering, only while holding a key
         bool airborne = jumpsUsed > 0;
 
         if (!airborne)
@@ -139,7 +122,7 @@ public class FrogController : MonoBehaviour
         }
     }
 
-    // The headbutt. Any body contact with the ball launches it away from the frog.
+    // any frog contact with the ball launches it away from it (headbutt)
     void OnCollisionEnter2D(Collision2D coll)
     {
         if (!coll.gameObject.CompareTag("Ball")) return;
@@ -152,8 +135,7 @@ public class FrogController : MonoBehaviour
 
         Vector2 away = (ballRb.position - rb.position).normalized;
 
-        // Replace the ball's velocity instead of adding to it, so a headbutt
-        // always sends it the same distance regardless of how it arrived.
+      // set the velocity instead of adding to it; every headbutt hits the same
         ballRb.linearVelocity = away * headbuttForce;
     }
 

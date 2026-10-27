@@ -7,11 +7,10 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    [Header("Match")]
+    // match
     public int pointsToWin = 5;
     public Key restartKey = Key.R;
 
-    [Header("Scene Refs")]
     public Ball ball;
     public Transform frog1;
     public Transform frog2;
@@ -40,7 +39,7 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        // The only input this script handles: restarting once someone has won
+        // input; restarting when someone wins
         if (!matchOver) return;
 
         Keyboard kb = Keyboard.current;
