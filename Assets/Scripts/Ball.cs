@@ -1,14 +1,14 @@
 using UnityEngine;
 
-// Caps the ball's top speed
-// The ball recovers if it escapes, gets stuck, or is sitting still
+// - caps the ball's top speed
+// - the ball recovers if it escapes, gets stuck, or is sitting still
 public class Ball : MonoBehaviour
 {
     public float maxSpeed = 18f;
 
     public float killY = -12f;            // fell out of the world
     public float stuckSpeed = 0.1f;       // ball is stuck
-    public float stuckSeconds = 15f;       // how long before we intervene
+    public float stuckSeconds = 15f;      // how long before we intervene
 
     Rigidbody2D rb;
     Vector2 startPos;

@@ -1,8 +1,8 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// Fires a short-range precision hit in the direction the player is holding.
-// Scores by placing the ball; also used defensively to swat the ball away.
+// - fires short hit in the direction the player is holding
+// - score by placing the ball; can also swat ball away
 public class Tongue : MonoBehaviour
 {
     // keys
@@ -24,9 +24,11 @@ public class Tongue : MonoBehaviour
 
     // empty child at the frog's right edge, mirroreed when facing left
     public Transform mouth;
+    public Transform tongueSprite;   // the tongue art in the scene
     public LineRenderer line;         // the visual
     public LayerMask hitMask;         // ball and frog layers
     public float showTime = 0.12f;
+    
 
     FrogController frog;
     float cooldownTimer;
@@ -36,6 +38,7 @@ public class Tongue : MonoBehaviour
     {
         frog = GetComponent<FrogController>();
         if (line != null) line.enabled = false;
+        if (tongueSprite != null) tongueSprite.gameObject.SetActive(false);
     }
 
     void Update()
@@ -45,8 +48,13 @@ public class Tongue : MonoBehaviour
         // hide visual a moment after firing
         if (hideTimer > 0f)
         {
+            // - keep the tongue stuck to the mouth while it is out
+            // - doesn't get left behind when the frog moves mid-fire
+            if (tongueSprite != null) tongueSprite.position = MouthOrigin();
+
             hideTimer -= Time.deltaTime;
             if (hideTimer <= 0f && line != null) line.enabled = false;
+            if (hideTimer <= 0f && tongueSprite != null) tongueSprite.gameObject.SetActive(false);
         }
 
         Keyboard kb = Keyboard.current;
@@ -78,8 +86,8 @@ public class Tongue : MonoBehaviour
 
         Vector2 origin = MouthOrigin();
 
-        // the mouth sits inside this frog's own collider, so a single cast would hit the frog itself
-        // cast for all hits and take the nearest one that isn't it
+        // - the mouth sits inside this frog's own collider, so a single cast would hit the frog itself
+        // - cast for all hits and take the nearest one that isn't it
         RaycastHit2D[] hits = Physics2D.CircleCastAll(
             origin, thickness, dir, length, hitMask);
 
@@ -108,14 +116,14 @@ public class Tongue : MonoBehaviour
 
             if (target.CompareTag("Ball") && targetBody != null)
             {
-                // setting velocity makes the tongue precise
-                // the ball goes exactly where you aimed, at a known speed
+                // - setting velocity makes the tongue precise
+                // - the ball goes exactly where you aimed, at a known speed
                 targetBody.linearVelocity = dir * ballSpeed;
             }
             else if (target.CompareTag("Frog"))
             {
-                // push the other frog instead of grabbing them
-                // goes through their controller so the shove isn't immediately overwritten by their movement code
+                // - push the other frog instead of grabbing them
+                // - goes through their controller so the shove isn't overwritten by their movement code
                 FrogController other = target.GetComponent<FrogController>();
                 if (other != null)
                 {
@@ -126,10 +134,12 @@ public class Tongue : MonoBehaviour
         }
 
         ShowTongue(origin, origin + dir * drawTo);
+        if (frog != null) frog.ShowTongueSprite(showTime);
+
     }
 
-    // the mouth is fixed to one side, so flip its X to match the frog's facing
-    // otherwise the tongue fires from behind the frog when it turns around.
+    // - the mouth is fixed to one side, so flip its X to match the frog's facing
+    // - otherwise the tongue fires from behind the frog when it turns around.
     Vector2 MouthOrigin()
     {
         Vector3 local = mouth.localPosition;
@@ -137,13 +147,21 @@ public class Tongue : MonoBehaviour
         return transform.TransformPoint(local);
     }
 
+    // - points the tongue art from the mouth to wherever cast ended
+    // - X scale is distance it needs to cover 
+    // - stops short on a hit instead of drawing at full reach every time
     void ShowTongue(Vector2 from, Vector2 to)
     {
-        if (line == null) return;
-        line.enabled = true;
-        line.positionCount = 2;
-        line.SetPosition(0, from);
-        line.SetPosition(1, to);
+        if (tongueSprite == null) return;
+
+        Vector2 delta = to - from;
+
+        tongueSprite.gameObject.SetActive(true);
+        tongueSprite.position = from;
+        tongueSprite.rotation = Quaternion.Euler(0f, 0f,
+            Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg);
+        tongueSprite.localScale = new Vector3(delta.magnitude, 1f, 1f);
+
         hideTimer = showTime;
     }
 }

@@ -73,6 +73,9 @@ public class GameManager : MonoBehaviour
         ZeroVelocity(frog1);
         ZeroVelocity(frog2);
 
+        ResetFacing(frog1);
+        ResetFacing(frog2);
+
         ball.ResetToCenter();
     }
 
@@ -84,6 +87,12 @@ public class GameManager : MonoBehaviour
             rb.linearVelocity = Vector2.zero;
             rb.angularVelocity = 0f;
         }
+    }
+
+    void ResetFacing(Transform t)
+    {
+        FrogController frog = t.GetComponent<FrogController>();
+        if (frog != null) frog.ResetFacing();
     }
 
     void EndMatch(int winner)
