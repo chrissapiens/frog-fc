@@ -22,10 +22,13 @@ public class Tongue : MonoBehaviour
     public float frogKnockback = 9f;
     public float frogKnockbackLift = 3f;
 
+    // audio
+    public AudioSource audioSource;
+    public AudioClip snapClip;
+
     // empty child at the frog's right edge, mirroreed when facing left
     public Transform mouth;
     public Transform tongueSprite;   // the tongue art in the scene
-    public LineRenderer line;         // the visual
     public LayerMask hitMask;         // ball and frog layers
     public float showTime = 0.12f;
     
@@ -37,7 +40,6 @@ public class Tongue : MonoBehaviour
     void Awake()
     {
         frog = GetComponent<FrogController>();
-        if (line != null) line.enabled = false;
         if (tongueSprite != null) tongueSprite.gameObject.SetActive(false);
     }
 
@@ -53,7 +55,6 @@ public class Tongue : MonoBehaviour
             if (tongueSprite != null) tongueSprite.position = MouthOrigin();
 
             hideTimer -= Time.deltaTime;
-            if (hideTimer <= 0f && line != null) line.enabled = false;
             if (hideTimer <= 0f && tongueSprite != null) tongueSprite.gameObject.SetActive(false);
         }
 
@@ -83,6 +84,8 @@ public class Tongue : MonoBehaviour
     void Fire(Vector2 dir)
     {
         cooldownTimer = cooldown;
+
+        if (audioSource != null && snapClip != null) audioSource.PlayOneShot(snapClip);
 
         Vector2 origin = MouthOrigin();
 
@@ -119,6 +122,8 @@ public class Tongue : MonoBehaviour
                 // - setting velocity makes the tongue precise
                 // - the ball goes exactly where you aimed, at a known speed
                 targetBody.linearVelocity = dir * ballSpeed;
+                Ball hitBall = targetBody.GetComponent<Ball>();
+                if (hitBall != null) hitBall.AddCharge();
             }
             else if (target.CompareTag("Frog"))
             {

@@ -1,0 +1,210 @@
+FROG FC - changes.txt
+Christopher Sapiens
+
+Changes between the one-pager doc and the game I built.
+
+CONTROLS:
+	"Can't control the frog while you're in the air" - 
+ 		I built it like that, and the game didn't 
+		work well. When two frogs landed on/next 
+		to each other, they would get stuck. I 
+		added some air controls so that you can 
+		steer in the air.
+  
+	Everything else in Controls worked -
+		Movement with arrows and WASD worked well 
+		as well as the double jump with a weaker 
+		second jump. I also included the tongue 
+		shots with the shift buttons; the tongue 
+		fires in whichever direction is held, with 
+		a cooldown.
+
+	Frogs land on each other -
+ 		Not in the doc. Frogs can land on each other 
+		to block the other player's tongue.
+
+
+HOLES:
+
+	I said that if the ball is too fast, it would skip 
+	the hole and not fall in. By using Discrete collision
+	instead of continuous in the ball's Rigidbody, it 
+	stops the ball from falling in every time.
+
+	The frogs walking over the holes is done by adding a 
+	solid collider above each hole, and by setting the 
+	colliders to ignore the ball. This means frogs can 
+	stand on it and balls fall in.
+
+
+CHANGES NOT MENTIONED IN ONE-PAGER:
+
+	Ball speed cap -
+		When the ball was pinned against the wall, 
+		it would force itself through the wall. I 
+		capped the ball's speed and added a 0.25s 
+		headbutt cooldown.
+
+	Corner ramps -
+		The ball kept getting stuck in the corners 
+		of the arena and would reset, which was 
+		annoying. I added angled ramps on each side 
+		so the ball never gets stuck in the corner.
+
+	Squeeze escape - 
+		One big thing I noticed that I had to change
+		was that players could ram the ball into 
+		each other and the ball would get wedged in 
+		between them. Then, it got really boring 
+		because both players would just be pressing 
+		the D and left arrow key to try and move each 
+		other in the desired direction. I tried 
+		friction, bounciness, and rounded colliders; 
+		none of them worked. I changed the code to act 
+		if a ball was basically still and touching a 
+		player. In that case, it is lifted and dropped 
+		back down. Now it gives the impression that a 
+		ball wedged in between two players slips up 
+		between them.
+
+	Inactivity reset - 
+		If the ball goes completely still for 15 seconds, 
+		it respawns at the center. I made the timer 
+		longer so that it doesn't punish someone who is 
+		ahead/trying to protect their lead  
+
+
+THE CHARGE BAR:
+
+	Built from my maybe list -
+		Three lily pad tiers, each one made active by a 
+		tongue hit; each one makes the ball heavier and 
+		slower.
+
+	Position - 
+		In the doc, I said it would be in the top right 
+		corner. Instead, it's in the center to make it 
+		easier to see.
+
+	Decay timer - 
+		Not in the doc. Because tongue hits happen so 
+		often, the three tiers were hit immediately. 
+		Those tiers stayed until someone scored, which 
+		meant the ball was heavy all game. I made the 
+		charge die down every few seconds, so the weight 
+		of the ball is constantly changing. 
+
+
+ART:
+
+	Two different frogs -
+		I said I would do one frog design with idle, 
+		jumping, and tongue out frames. Instead, I drew 
+		those frames for two different frog species (green 
+		red-eyed tree frog and blue poison dart frog). 
+		This made it easier to distinguish between players.
+
+	No splash effect -
+		While I added a splash sound effect, I did not
+		add the visual effect of water splashing up.
+
+	No frog crest title card - 
+		I wanted to make a crest with frogs and their 
+		tongues crossing. I kept my title card simpler for 
+		time's sake.
+
+
+AUDIO:
+
+	Sourced from Freesound - 
+		Didn't use Pixabay; found better sounds on Freesound.
+
+	Headbutt thump cut -
+		I was going to add a thump for headbutts, but along 
+		with the other sound effects I added, there was too 
+		much sound. Because headbutts happen so often, I 
+		didn't want to run the risk of the audio being all 
+		jumbled up.
+
+	Tongue sound plays on the shot - 
+		I was going to make the tongue make a sound when it 
+		hit the ball, but instead made the sound when the 
+		tongue was shot out.
+
+	Frog impact sound cut - 
+ 		I was going to add a sound when frogs impacted each 
+		other or were hit by each other's tongues, but I 
+		decided not to.
+
+	Charge beep cut - 
+		I was going to add a sound when each charge tier was 
+		added, but I decided not to.
+
+	Croak pitch - 
+		I added a croak for jumps and pitched the two players'
+		croaks differently.
+
+
+GAME FLOW:
+
+	Title screen is an overlay - 
+		I said the title screen would be its own thing, but 
+		instead I decided to make it a screen over the game. 
+		The overlay freezes the game until you hit Space. 
+
+	Match win screen restarts the match - 
+		Instead of going to the title screen, you are prompted 
+		to press R to restart the match and play again. This way 
+		you don't have to continue rereading the title screen/
+		controls every time.
+	
+  	Kickoff, scorea, restart, and first-to-5 are all implemented as 
+	mentioned in the doc.
+
+
+MAYBES I CUT:
+
+	Flies -
+		Did not add the flies. I preferred to have the charge bar.
+  		The flies would've been a whole separate system.
+
+	Difficulty levels -
+  		Wanted to add difficulty levels, didn't get to it. Maybe 
+		I will add this later (different hole widths?).
+
+
+CONCERNS REVISITED:
+
+	"Getting a ball that is satisfying to hit will take the most 
+	amount of time" - 
+		This was true. It took a lot of time to get the gravity, 
+		bouncing, damping, force, and speed cap right since they 
+		all influence one another.
+ 		
+	"Hole size is difficult" - 
+		Made the hole size one unit wide. It's wide enough so that 
+		the ball drops in if you place it, but narrow enough that 
+		if you hit it too fast, it skips across it.
+
+	"Scoring may be too hard: the tongue can save the ball" - 
+ 		Not really a problem. Scoring can be a little difficult. 
+		Shooting your tongue to save the ball costs you the cooldown. 
+		That being said, the save works, but it comes at a cost.
+
+	"Need the two ways to hit the ball to be different" - 
+		This one mattered the most, in my opinion. A headbutt is too 
+		fast/strong, so it's pretty difficult to score with it. You 
+		can clear with the headbutt. The togue makes it easier to place 
+		the ball into the hole. 
+
+	"If the tongue does not feel good after tuning, making the holes wider 
+	makes the headbutt more useful than the tongue" -
+		Luckily, I did not need this fallback. The holes are still 
+		narrow and the tongue is still an important tool for scoring. 
+		This was the version I wanted.
+
+	I will add that at some point during my practice gameplay, I was 
+	concerned about a player just camping/sitting over their goal so that 
+	you cannot score. Because of the tongue feature, though, you can knock 
+	players back and move them from their position, so this wasn't a big problem. 
+	I will still try to find a way to fix this.

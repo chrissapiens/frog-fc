@@ -25,18 +25,24 @@ public class FrogController : MonoBehaviour
 
     public float knockbackTime = 0.3f; // time a player can't move horizontally after being tongue hit
 
+    // ground
     public Transform groundCheck;         // empty child at the frog's feet
     public float groundCheckRadius = 0.15f;
     public LayerMask groundLayer;
 
-    // sprites facing left
+    // audio
+    public AudioSource audioSource;
+    public AudioClip croakClip;
+    public float croakPitch = 1f;
+    
+    // sprites facing right
     public SpriteRenderer spriteRenderer;
     public Sprite idleRight;
     public Sprite jumpRight;
     public Sprite tongueRight;
     public Sprite jumpTongueRight;
 
-    // sprites facing right
+    // sprites facing left
     public Sprite idleLeft;
     public Sprite jumpLeft;
     public Sprite tongueLeft;
@@ -57,6 +63,7 @@ public class FrogController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
         if (startFacingLeft) Facing = -1;
+        if (audioSource == null) audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -84,6 +91,11 @@ public class FrogController : MonoBehaviour
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
             rb.AddForce(Vector2.up * force, ForceMode2D.Impulse);
             jumpsUsed++;
+            if (audioSource != null && croakClip != null)
+            {
+                audioSource.pitch = croakPitch;
+                audioSource.PlayOneShot(croakClip);
+            }
         }
         UpdateVisuals();
     }

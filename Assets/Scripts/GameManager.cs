@@ -18,6 +18,11 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI score2Text;
     public TextMeshProUGUI winnerText;   // hidden until someone wins
 
+    // audio
+    public AudioSource audioSource;
+    public AudioClip splashClip;
+    public AudioClip winClip;
+
     int score1;
     int score2;
     Vector3 frog1Start;
@@ -51,6 +56,8 @@ public class GameManager : MonoBehaviour
     public void ScorePoint(int player)
     {
         if (matchOver) return;
+
+        if (audioSource != null && splashClip != null) audioSource.PlayOneShot(splashClip);
 
         if (player == 1) score1++; else score2++;
         UpdateScoreText();
@@ -97,6 +104,8 @@ public class GameManager : MonoBehaviour
 
     void EndMatch(int winner)
     {
+        if (audioSource != null && winClip != null) audioSource.PlayOneShot(winClip);
+        
         matchOver = true;
         if (winnerText != null)
         {
